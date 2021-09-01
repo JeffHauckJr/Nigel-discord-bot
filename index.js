@@ -53,8 +53,8 @@ client.on("messageCreate", async (msg) => {
       console.log(data);
 
       const embed = new MessageEmbed()
-        .setColor("#7d32a8")
-        .setTitle(`${data.name} Forecast`)
+        .setColor("#ff9538")
+        .setTitle(`${data.name}'s Forecast`)
         .setURL()
         .addFields(
           { name: "Current Conditions", value: `${description}` },
@@ -74,17 +74,80 @@ client.on("messageCreate", async (msg) => {
 
   if (command === "news") {
     const topic = msg.content.split(" ").slice(2).join(" ");
-    console.log(topic, "THIS IS THE TOPIC");
     try {
       const CEURL = `https://newsapi.org/v2/everything?q=${topic}&apiKey=${CETOKEN}`;
-      const  response  = await axios.get(CEURL);
-      console.log(response.data, "!!!!!!!!!!!!!!!!!!!!!");
-      msg.reply(`This shit is working Master ${msg.author.username}`)
+      const response = await axios.get(CEURL);
+      const data = response.data;
+      const updatedArticles = data.articles.splice(0, 3);
+
+      console.log(data, "!!!!!!!!!!!!!!!!!");
+
+      const newsEmbed = new MessageEmbed()
+        .setColor("#0426d1")
+        .setTitle(
+          `
+        News On ${topic}
+        To Continue Reading Click on title`
+        )
+        .setURL(updatedArticles[0].url)
+        .addFields(
+          { name: "Title", value: `${updatedArticles[0].title}` },
+          { name: "Author", value: `${updatedArticles[0].author}` },
+          { name: "Description", value: `${updatedArticles[0].description}` },
+          { name: "Content", value: `${updatedArticles[0].content}` },
+          { name: "Published Date", value: `${updatedArticles[0].publishedAt}` }
+        );
+
+      const newsEmbed2 = new MessageEmbed()
+        .setColor("#0426d1")
+        .setTitle(
+          `
+        News On ${topic}
+        To Continue Reading Click on title`
+        )
+        .setURL(updatedArticles[1].url)
+        .addFields(
+          { name: "Title", value: `${updatedArticles[1].title}` },
+          { name: "Author", value: `${updatedArticles[1].author}` },
+          { name: "Description", value: `${updatedArticles[1].description}` },
+          { name: "Content", value: `${updatedArticles[1].content}` },
+          { name: "Published Date", value: `${updatedArticles[1].publishedAt}` }
+        );
+
+      msg.reply({ embeds: [newsEmbed, newsEmbed2] });
     } catch (err) {
-      console.log(err, 'this is the error');
+      console.log(err, "this is the error");
       msg.reply(
         `Sorry Master ${msg.author.username} there are no articles on that topic`
       );
+    }
+  }
+
+  if (command === "nigel") {
+    const question = msg.content.split(" ").slice(2).join(" ")
+    console.log(question, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    try {
+      const searchUrl = `https://api.duckduckgo.com/?q=${question}&format=json&pretty=1&no_html=1&skip_disambig=1`
+      const response = await axios.get(searchUrl)
+      const data = response.data
+      console.log(data)
+
+      const questionEmbed = new MessageEmbed()
+      .setColor("#0426d1")
+      .setTitle(
+        `
+      Master ${msg.author.username} This is what I have found regarding your question
+      `
+      )
+      .setURL(data.AbstractURL)
+      .setFields(
+        { name: 'Answer' , value: `${data.AbstractText}`}
+
+      )
+      msg.reply( {embeds: [questionEmbed]})
+    } catch(err) {
+      console.log(err)
+      msg.reply('I am not too sure on that one Sir')
     }
   }
 });
