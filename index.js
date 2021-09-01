@@ -1,6 +1,3 @@
-//4 Bot can be connected with other api based on question
-//search for other keywords that may apply
-
 require("dotenv").config();
 const axios = require("axios");
 const { Client, Intents, MessageEmbed } = require("discord.js");
@@ -15,13 +12,20 @@ const TOKEN = process.env.TOKEN;
 const WEATHER_KEY = process.env.WEATHER_KEY;
 const CETOKEN = process.env.CETOKEN;
 
+//Log To Console when live
 client.on("ready", () => {
   console.info(`Logged in as ${client.user.tag}!`);
 });
 
+
+
+//Command to activate Nigel
 const prefix = "!";
 
+//test room id
 const channelId = "880527083909025793";
+
+//Greeter Message to new members of the channel.
 client.on("guildMemberAdd", (member) => {
   console.log(member);
   const message = `Welcome Master ${member.user}`;
@@ -29,14 +33,24 @@ client.on("guildMemberAdd", (member) => {
   channel.send(message);
 });
 
+//Message Create Responses
 client.on("messageCreate", async (msg) => {
+  //Log to the console recognizing no Command
   if (msg.content[0] !== prefix) {
     console.log("no prefix");
     return;
   }
+  
+  
+
+
+  
+  //
   const args = msg.content.slice(prefix.length).trim().split(" ");
+  //
   const command = args.shift().toLowerCase();
 
+  //Weather Man using Node.js
   if (command === "weather") {
     try {
       const city = msg.content.split(" ").slice(2).join(" ");
@@ -71,13 +85,14 @@ client.on("messageCreate", async (msg) => {
       msg.reply(`No Current Data`);
     }
   }
-
+  //News Bot takes top 2 articles
   if (command === "news") {
     const topic = msg.content.split(" ").slice(2).join(" ");
     try {
       const CEURL = `https://newsapi.org/v2/everything?q=${topic}&apiKey=${CETOKEN}`;
       const response = await axios.get(CEURL);
       const data = response.data;
+      //This allows me to limit the data if needed
       const updatedArticles = data.articles.splice(0, 3);
 
       console.log(data, "!!!!!!!!!!!!!!!!!");
@@ -122,34 +137,70 @@ client.on("messageCreate", async (msg) => {
       );
     }
   }
-
+  //Ansewr Bot
   if (command === "nigel") {
-    const question = msg.content.split(" ").slice(2).join(" ")
-    console.log(question, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    const question = msg.content.split(" ").slice(2).join(" ");
+    const search = question
+      .replace("an", "")
+      .replace("what", "")
+      .replace("is", "")
+      .replace("a", "")
+      .replace("how", "")
+      .replace("when", "")
+      .replace("where", "")
+      .replace("why", "")
+    console.log(question, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     try {
-      const searchUrl = `https://api.duckduckgo.com/?q=${question}&format=json&pretty=1&no_html=1&skip_disambig=1`
-      const response = await axios.get(searchUrl)
-      const data = response.data
-      console.log(data)
+      const searchUrl = `https://api.duckduckgo.com/?q=${search}&format=json&pretty=1&no_html=1&skip_disambig=1`;
+      const response = await axios.get(searchUrl);
+      const data = response.data;
+      console.log(data);
 
       const questionEmbed = new MessageEmbed()
-      .setColor("#0426d1")
-      .setTitle(
-        `
-      Master ${msg.author.username} This is what I have found regarding your question
+        .setColor("#0426d1")
+        .setTitle(
+          `
+      Master ${msg.author.username}, This is what I have found regarding your question
+      ${question}
       `
-      )
-      .setURL(data.AbstractURL)
-      .setFields(
-        { name: 'Answer' , value: `${data.AbstractText}`}
-
-      )
-      msg.reply( {embeds: [questionEmbed]})
-    } catch(err) {
-      console.log(err)
-      msg.reply('I am not too sure on that one Sir')
+        )
+        .setURL(data.AbstractURL || data.RelatedTopics[0].FirstUrl)
+        .setFields({
+          name: "Answer",
+          value: `${data.AbstractText || data.RelatedTopics[0].Text}`,
+        });
+      msg.reply({ embeds: [questionEmbed] });
+    } catch (err) {
+      console.log(err);
+      msg.reply("I am not too sure on that one Sir");
     }
   }
+
+  if (command === "commands") {
+    const commandEmbed = new MessageEmbed()
+      .setColor("#3e4a4f")
+      .setTitle(`
+      Hello Master ${msg.author.username}, Below are the current commands I can assist you with.
+      `)
+      .addFields(
+        { name: "Weather", value: `! weather [City]` },
+        { name: "News", value: `! news [Topic]` },
+        { name: "Questions", value: `! Nigel [Question]` },
+        {
+          name: "Author",
+          value: `
+          Discord: <@122818058703208450>
+          Github: https://github.com/JeffHauckJr 
+          `,
+        }
+      );
+
+    msg.reply({ embeds: [commandEmbed] });
+  }
+
+  
+
+  
 });
 
 client.login(TOKEN);
