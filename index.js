@@ -11,13 +11,12 @@ const client = new Client({
 const TOKEN = process.env.TOKEN;
 const WEATHER_KEY = process.env.WEATHER_KEY;
 const CETOKEN = process.env.CETOKEN;
+const SEARCH_TOKEN = process.env.SEARCH_TOKEN;
 
 //Log To Console when live
 client.on("ready", () => {
   console.info(`Logged in as ${client.user.tag}!`);
 });
-
-
 
 //Command to activate Nigel
 const prefix = "!";
@@ -40,11 +39,7 @@ client.on("messageCreate", async (msg) => {
     console.log("no prefix");
     return;
   }
-  
-  
 
-
-  
   //
   const args = msg.content.slice(prefix.length).trim().split(" ");
   //
@@ -149,6 +144,8 @@ client.on("messageCreate", async (msg) => {
       .replace("when", "")
       .replace("where", "")
       .replace("why", "")
+      .replace("who", "")
+      .replace("was", "");
     console.log(question, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     try {
       const searchUrl = `https://api.duckduckgo.com/?q=${search}&format=json&pretty=1&no_html=1&skip_disambig=1`;
@@ -170,6 +167,11 @@ client.on("messageCreate", async (msg) => {
           value: `${data.AbstractText || data.RelatedTopics[0].Text}`,
         });
       msg.reply({ embeds: [questionEmbed] });
+
+      // try {
+      //     const searchUrl = `https://serpapi.com/search.json?q=${question}&hl=en&gl=us&api_key=${SEARCH_TOKEN}`
+      //     const response = await axios.get(searchUrl)
+      //     console.log(response.data.answer_box)
     } catch (err) {
       console.log(err);
       msg.reply("I am not too sure on that one Sir");
@@ -179,13 +181,16 @@ client.on("messageCreate", async (msg) => {
   if (command === "commands") {
     const commandEmbed = new MessageEmbed()
       .setColor("#3e4a4f")
-      .setTitle(`
+      .setTitle(
+        `
       Hello Master ${msg.author.username}, Below are the current commands I can assist you with.
-      `)
+      `
+      )
       .addFields(
         { name: "Weather", value: `! weather [City]` },
         { name: "News", value: `! news [Topic]` },
         { name: "Questions", value: `! Nigel [Question]` },
+        { name: "Covid Data", value: `! Covid [Country]` },
         {
           name: "Author",
           value: `
@@ -195,12 +200,45 @@ client.on("messageCreate", async (msg) => {
         }
       );
 
-    msg.reply({ embeds: [commandEmbed] });
+    msg.channel.send({ embeds: [commandEmbed] });
   }
 
-  
+  // Current Covid Cases
+  if (command === "covid") {
+    const country = msg.content.split(" ").slice(2).join(" ");
+    try {
+      const covidURL = `https://corona.lmao.ninja/v2/countries/${country}?yesterday&strict&query%20`;
+      const response = await axios.get(covidURL);
+      const data = response.data;
+      console.log(response.data, "!!!!!!!!!!!!!!!!!!!!!!!!");
+      const recoveryPercent = (data.recovered / data.cases) * 100;
 
-  
+      const covidEmbed = new MessageEmbed()
+        .setColor("#0a791a")
+        .setTitle(
+          `
+      Hello Master ${msg.author.username}, Here are the current Covid States for ${response.data.country}.
+      `
+        )
+        .setImage(data.countryInfo.flag)
+        .addFields(
+          { name: "Total Cases", value: `${data.cases}` },
+          { name: "Total Deaths", value: `${data.deaths}` },
+          { name: "Total Recoveries", value: `${data.recovered}` },
+          {
+            name: "Recovery Percent",
+            value: `${Math.round(recoveryPercent)}%`,
+          },
+          { name: "Active Cases", value: `${data.active}` },
+          { name: "Active Critical Cases", value: `${data.critical}` }
+        );
+
+      msg.channel.send({ embeds: [covidEmbed] });
+    } catch (err) {
+      console.log(err);
+      msg.reply();
+    }
+  }
 });
 
 client.login(TOKEN);
