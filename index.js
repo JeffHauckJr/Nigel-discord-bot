@@ -11,7 +11,7 @@ const client = new Client({
 const TOKEN = process.env.TOKEN;
 const WEATHER_KEY = process.env.WEATHER_KEY;
 const CETOKEN = process.env.CETOKEN;
-const SEARCH_TOKEN = process.env.SEARCH_TOKEN;
+const YT_TOKEN = process.env.YOUTUBE_TOKEN;
 
 //Log To Console when live
 client.on("ready", () => {
@@ -38,8 +38,7 @@ client.on("guildMemberAdd", (member) => {
 
 //Message Create Responses
 client.on("messageCreate", async (msg) => {
-  //Log to the console recognizing no Command
-  console.log(msg)
+
   if (
     msg.content.includes(`Thanks Nigel`) ||
     msg.content.includes(`Thank you Nigel`)
@@ -47,6 +46,14 @@ client.on("messageCreate", async (msg) => {
     console.log("This is firing");
     msg.reply(`You are welcome Master ${msg.author.username}`);
   }
+  const userId = msg.author.id;
+  //Log to the console recognizing no Command
+  if (msg.content[0] !== prefix) {
+    console.log("no prefix");
+    return;
+  }
+
+  
   //
   const args = msg.content.slice(prefix.length).trim().split(" ");
   //
@@ -164,7 +171,6 @@ client.on("messageCreate", async (msg) => {
     try {
       const searchUrl = `https://api.duckduckgo.com/?q=${search}&format=json&pretty=1&no_html=1&skip_disambig=1`;
       console.log(search);
-      // const searchUrl = `https://duckduckgo.com/html/?q=${search}`;
       const response = await axios.get(searchUrl);
       const data = response.data;
       console.log(data);
@@ -183,16 +189,10 @@ ${question}
           value: `${data.AbstractText || data.RelatedTopics[0].Text}`,
         });
       msg.reply({ embeds: [questionEmbed] });
-
-      //Different Search API
-      // try {
-      //     const searchUrl = `https://serpapi.com/search.json?q=${question}&hl=en&gl=us&api_key=${SEARCH_TOKEN}`
-      //     const response = await axios.get(searchUrl)
-      //     console.log(response.data.answer_box)
     } catch (err) {
       console.log(err);
       msg.reply(
-        "I am not too sure on that one Sir, Perhaps you can rephrase your question?"
+        "I am not too sure on that one, Perhaps you can rephrase your question?"
       );
     }
   }
@@ -210,6 +210,7 @@ ${question}
         { name: "News", value: `! news [Topic]` },
         { name: "Questions", value: `! Nigel [Question]` },
         { name: "Covid Data", value: `! Covid [Country]` },
+        { name: "YouTube Video", value: `! yt [video keyword]` },
         {
           name: "Author",
           value: `
@@ -258,26 +259,40 @@ ${question}
       msg.reply(`That is not a country Master ${msg.author.username}`);
     }
   }
-  //This is just something to mess with a user 
-  // if (msg.author.id === '122818058703208450') {
+  //This is just something to mess with a user
+  // if (msg.author.id === '867425001589440572') {
   //   try {
   //     const img = 'https://cdn.discordapp.com/attachments/879797937096515587/883164171053715518/Mocking-Spongebob.png'
   //     const roast = [
   //       "Shut up Bitch",
   //       "Ya mama",
-  //       "Get a load of this guy",
   //       "Who are you again?",
   //       img,
   //       "And you are?"
   //     ]
   //     var randomResponse = roast[Math.floor(Math.random()*roast.length)];
-      
+
   //     msg.reply(`${randomResponse}`)
   //   } catch(err) {
   //     console.err(err)
   //   }
-    
-  //}
+
+  // }
+
+  if (command === "yt") {
+    const ytSearch = msg.content.split(" ").slice(2).join(" ");
+
+    try {
+      const ytURL = `https://www.googleapis.com/youtube/v3/search?key=${YT_TOKEN}&type=video&part=snippet&q=${ytSearch}`;
+      const response = await axios.get(ytURL);
+      const data = response.data.items;
+
+      msg.reply(`https://www.youtube.com/watch?v=${data[0].id.videoId}`);
+    } catch (err) {
+      console.log(err);
+      msg.reply("Sorry, I could not find a video on that.")
+    }
+  }
 });
 
 client.login(TOKEN);
