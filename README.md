@@ -27,4 +27,11 @@
 ```
 ![Answer](https://cdn.discordapp.com/attachments/770968803717939201/885228201264173106/question.PNG)
 
+#### Nigel's YT function allows the user to pull a youtube video that best fits the Keyword or Phrase
+
+```
+! yt [phrase]
+```
+![YouTube](https://cdn.discordapp.com/attachments/770968803717939201/885229858152669204/yt.PNG)
+
 
