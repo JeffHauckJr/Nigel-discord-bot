@@ -4,7 +4,6 @@
 ```
 ~ commands || This will pull up a Message Embed listing all available commands.
 ![GitHub Logo](/images/logo.png)
-Format: ![Alt Text](url)
 ```
 
 
