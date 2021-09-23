@@ -5,6 +5,7 @@ const newsFunction = require("./src/news");
 const qaFunction = require("./src/q_a")
 const weatherFunction = require("./src/weather")
 const ytFunction = require("./src/yt")
+const testCommand = require("./src/test")
 const prefix = "!";
 
 module.exports = async (msg) => {
@@ -14,6 +15,7 @@ module.exports = async (msg) => {
         return;
       }
 
+     
     if (
         msg.content.includes(`Thanks Nigel`) ||
         msg.content.includes(`Thank you Nigel`)
@@ -28,6 +30,18 @@ module.exports = async (msg) => {
       const args = msg.content.slice(prefix.length).trim().split(" ");
       //
       const command = args.shift().toLowerCase();
+
+      
+      
+      
+      if(command === "test"){
+        testCommand(msg)
+      }
+        
+      
+
+      //10,800,000 3 hours in ms
+
     
       //Weather Man using Node.js
       if (command === "weather") {

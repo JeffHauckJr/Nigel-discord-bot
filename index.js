@@ -5,6 +5,7 @@ const client = new Client({
     Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_VOICE_STATES
   ],
 });
 const commandHandler = require("./commands")
@@ -13,9 +14,29 @@ const TOKEN = process.env.TOKEN;
 //Log To Console when live
 client.on("ready", () => {
   console.info(`Logged in as ${client.user.tag}!`);
+  client.user.setPresence({
+    status: 'idle'
+})
+client.user.setActivity("Improving", {type: "COMPETING"})
 });
 
-//Command to activate Nigel
+
+
+
+client.on('voiceStateUpdate', (oldMember, newMember) => {
+  
+  let newUserChannel = newMember.voiceChannel
+  let oldUserChannel = oldMember.voiceChannel
+
+  if(oldUserChannel === undefined && newUserChannel !== undefined) {
+     console.log("This is the if")
+     
+
+  } else if(newUserChannel === undefined){
+    console.log("This is the else")
+    console.log(client.channels.cache)
+  }
+})
 
 
 //test room id
